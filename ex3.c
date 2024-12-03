@@ -65,9 +65,19 @@ void printBrandName(int brand)
         printf("%c", brands[brand][index]);
         index++;
     }
-    printf(", ");
 }
 
+void printTypeName(int type)
+{
+    int index = 0;
+    while (types[type][index] != '\0')
+    {
+        printf("%c", types[type][index]);
+        index++;
+    }
+}
+
+//checks whether the requested car brand has sales information on the requested day
 int brandSaleIsFull(int brand,int day)
 {
     if(cube[day][brand][start] == -1)
@@ -76,6 +86,7 @@ int brandSaleIsFull(int brand,int day)
         return 1;
 }
 
+//If sal
 int allBrandsSalesAreFull(int day)
 {
     int count = 0;
@@ -101,8 +112,118 @@ int currentSalesDay()
 }
 */
 
+int totalSalesSum(int day)
+{
+    day = day - addOne;
+    int sum = 0;
+    for(int i = 0; i < NUM_OF_BRANDS; i++)
+        for (int j = 0; j < NUM_OF_TYPES; j++)
+            sum += cube[day][i][j];
+    return sum;
+}
 
-//void addAllCheck (int con);
+int maxBrandSalesAmount(int day)
+{
+    day = day - addOne;
+    int max = 0;
+    int sum = 0;
+    for(int i = 0; i < NUM_OF_BRANDS; i++)
+    {
+        for (int j = 0; j < NUM_OF_TYPES; j++)
+        {
+            sum += cube[day][i][j];
+        }
+            if(sum > max)
+                max = sum;
+            sum = 0;
+    }
+    return max;
+}
+
+int maxTypeSalesAmount(int day)
+{
+    day = day - addOne;
+    int max = 0;
+    int sum = 0;
+    for(int i = 0; i < NUM_OF_TYPES; i++)
+    {
+        for (int j = 0; j < NUM_OF_BRANDS; j++)
+        {
+            sum += cube[day][j][i];
+        }
+            if(sum > max)
+                max = sum;
+            sum = 0;
+    }
+    return max;
+}
+
+int maxSalesBrand(int day)
+{
+    day = day - addOne;
+    int max = 0;
+    int sum = 0;
+    int brand = 0;
+    for(int i = 0; i < NUM_OF_BRANDS; i++)
+    {
+        for (int j = 0; j < NUM_OF_TYPES; j++)
+        {
+            sum += cube[day][i][j];
+        }
+            if(sum > max)
+            {
+                max = sum;
+                brand = i;
+            }
+            sum = 0;
+    }
+    return brand;
+}
+
+int maxSalesType(int day)
+{
+    day = day - addOne;
+    int max = 0;
+    int sum = 0;
+    int type = 0;
+    for(int i = 0; i < NUM_OF_TYPES; i++)
+    {
+        for (int j = 0; j < NUM_OF_BRANDS; j++)
+        {
+            sum += cube[day][j][i];
+        }
+        if(sum > max)
+        {
+            max = sum;
+            type = i;
+        }
+        sum = 0;
+    }
+    return type;
+}
+
+
+void salesInfoLine()
+{
+    int day = days[start];
+    for(int i = 0; i < NUM_OF_BRANDS; i++)
+    {
+        printf("Sales for ");
+        printBrandName(i);
+        printf(":\n");
+        for(int j = 0; j < day; j++)
+        {
+            printf("Day %d- ",j+addOne);
+            for (int t = 0; t < NUM_OF_TYPES; t++)
+            {
+                printTypeName(t);
+                printf(": %d ", cube[j][i][t]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
+}
 
 
 int main() {
@@ -134,17 +255,24 @@ int main() {
             //***************
 
             case addAll:
-                int currentSalesDay = days[start];
+                int currentSalesDay = days[start]; //Current sales day
+            //program keep running until all sales will be successfully filled
             while (allBrandsSalesAreFull(currentSalesDay)==start)
             {
+                //Prints input massage and lets the user know what fields are empty
                 printf("No data for brands ");
                 for(int i = 0; i < NUM_OF_BRANDS; i++)
                 {
                     if(brandSaleIsFull(i,currentSalesDay)==start)
+                    {
                         printBrandName(i);
+                        printf(", ");
+                    }
                 }
                 printf("\nPlease complete the data\n");
+                //Sales input
                 scanf(" %d %d %d %d %d", &carBrand , &suvSum , &sedanSum , &coupeSum , &gtSum );
+                //keep showing text in case user entered invalid brands - stops when brand is valid
                 while (carBrand < start || carBrand > print || brandSaleIsFull(carBrand,currentSalesDay)==addOne)
                 {
                     printf("This brand is not valid\n");
@@ -152,15 +280,43 @@ int main() {
                     for(int i = 0; i < NUM_OF_BRANDS; i++)
                     {
                         if(!brandSaleIsFull(i,currentSalesDay))
+                        {
                             printBrandName(i);
+                            printf(", ");
+                        }
                     }
                     printf("\nPlease complete the data\n");
                     scanf(" %d %d %d %d %d", &carBrand , &suvSum , &sedanSum , &coupeSum , &gtSum );
                 }
+                //after checking all data is valid - sales data enters the array
                 insertSum(carBrand,suvSum,sedanSum,coupeSum,gtSum,cube);
                 addOneDay(carBrand);
             }
-                break;
+                break; //back to menu
+
+
+        case stats:
+            int dayCase3;
+            printf("What day would you like to analyze?\n");
+            scanf("%d", &dayCase3);
+            while (dayCase3<0 || dayCase3>currentSalesDay+addOne)
+            {
+                printf("Please enter a valid day.\nWhich day would you like to analyze?\n");
+                scanf("%d", &dayCase3);
+            }
+            printf("In day number %d:\nThe sales total was %d\nThe best sold brand with %d sales was ",dayCase3,totalSalesSum(dayCase3),maxBrandSalesAmount(dayCase3));
+            printBrandName(maxSalesBrand(dayCase3));
+            printf("\nThe best sold type with %d sales was ",maxTypeSalesAmount(dayCase3));
+            printTypeName(maxSalesType(dayCase3));
+            printf("\n");
+            break;
+
+
+        case print:
+            printf("*****************************************\n\n");
+            salesInfoLine();
+            printf("\n*****************************************\n");
+            break;
 
             /*
              ......
