@@ -483,7 +483,6 @@ int main() {
                 printf("Not enough days for this process.\n");
                 break;
             }
-                printf("Not enough days for this process.\n");
                 for(int i = 0; i < NUM_OF_BRANDS; i++)
                 {
                     printf("Brand: ");
