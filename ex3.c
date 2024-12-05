@@ -99,18 +99,6 @@ int allBrandsSalesAreFull(int day)
     else
     return 0;
 }
-/*
-int currentSalesDay()
-{
-    int max = days[start];
-    for(int i=1; i < NUM_OF_BRANDS; i++)
-    {
-        if (days[i] > max)
-            max = days[i];
-    }
-    return max;
-}
-*/
 
 int totalSalesSum(int day)
 {
@@ -202,6 +190,150 @@ int maxSalesType(int day)
     return type;
 }
 
+int bestSellingBrand()
+{
+    int sum = 0;
+    int max = 0;
+    int brand = 0;
+    for(int i = 0; i < NUM_OF_BRANDS; i++)
+    {
+        for (int j = 0; j < NUM_OF_TYPES; j++)
+        {
+            for(int k = 0; k < days[start]; k++)
+            {
+                sum += cube[k][i][j];
+            }
+        }
+        if(sum > max)
+        {
+            max = sum;
+            brand = i;
+        }
+        sum = 0;
+    }
+    return brand;
+}
+
+
+int bestSellingBrandAmount()
+{
+    int sum = 0;
+    int max = 0;
+    for(int i = 0; i < NUM_OF_BRANDS; i++)
+    {
+        for (int j = 0; j < NUM_OF_TYPES; j++)
+        {
+            for(int k = 0; k < days[start]; k++)
+            {
+                sum += cube[k][i][j];
+            }
+        }
+        if(sum > max)
+        {
+            max = sum;
+        }
+        sum = 0;
+    }
+    return max;
+}
+
+int bestSellingType()
+{
+    int sum = 0;
+    int max = 0;
+    int type = 0;
+    for(int i = 0; i < NUM_OF_TYPES; i++)
+    {
+        for (int j = 0; j < NUM_OF_BRANDS; j++)
+        {
+            for(int k = 0; k < days[start]; k++)
+            {
+                sum += cube[k][j][i];
+            }
+        }
+        if(sum > max)
+        {
+            max = sum;
+            type = i;
+        }
+        sum = 0;
+    }
+    return type;
+}
+
+
+int bestSellingTypeAmount()
+{
+    int sum = 0;
+    int max = 0;
+    for(int i = 0; i < NUM_OF_TYPES; i++)
+    {
+        for (int j = 0; j < NUM_OF_BRANDS; j++)
+        {
+            for(int k = 0; k < days[start]; k++)
+            {
+                sum += cube[k][j][i];
+            }
+        }
+        if(sum > max)
+        {
+            max = sum;
+        }
+        sum = 0;
+    }
+    return max;
+}
+
+
+int bestSellingDayAmount()
+{
+    int sum = 0;
+    int max = 0;
+    for(int i = 0; i < days[start]; i++)
+    {
+        for (int j = 0; j < NUM_OF_BRANDS; j++)
+        {
+            for(int k = 0; k < NUM_OF_TYPES; k++)
+            {
+                sum += cube[i][j][k];
+            }
+        }
+        if(sum > max)
+        {
+            max = sum;
+        }
+        sum = 0;
+    }
+    return max;
+}
+
+
+
+int bestSellingDay()
+{
+    int sum = 0;
+    int max = 0;
+    int day = 0;
+    for(int i = 0; i < days[start]; i++)
+    {
+        for (int j = 0; j < NUM_OF_BRANDS; j++)
+        {
+            for(int k = 0; k < NUM_OF_TYPES; k++)
+            {
+                sum += cube[i][j][k];
+            }
+        }
+        if(sum > max)
+        {
+            max = sum;
+            day = i;
+        }
+        sum = 0;
+    }
+    return day;
+}
+
+
 
 void salesInfoLine()
 {
@@ -223,6 +355,20 @@ void salesInfoLine()
         }
         printf("\n");
     }
+}
+
+double brandDelta(int brand)
+{
+    int firstSum = 0;
+    int lastSum = 0;
+    double difference = 0;
+    for(int k = 0; k < NUM_OF_TYPES; k++)
+            {
+                firstSum += cube[start][brand][k];
+                lastSum += cube[days[start]-addOne][brand][k];
+            }
+            difference += lastSum - firstSum;
+    return difference/(days[start]-addOne);
 }
 
 
@@ -299,7 +445,7 @@ int main() {
             int dayCase3;
             printf("What day would you like to analyze?\n");
             scanf("%d", &dayCase3);
-            while (dayCase3<0 || dayCase3>currentSalesDay+addOne)
+            while (dayCase3<=0 || dayCase3>currentSalesDay+addOne)
             {
                 printf("Please enter a valid day.\nWhich day would you like to analyze?\n");
                 scanf("%d", &dayCase3);
@@ -316,6 +462,36 @@ int main() {
             printf("*****************************************\n\n");
             salesInfoLine();
             printf("\n*****************************************\n");
+            break;
+
+
+        case insights:
+            printf("The best-selling brand overall is ");
+            printBrandName(bestSellingBrand());
+            printf(": %d$\n",bestSellingBrandAmount());
+            printf("The best-selling type of car is ");
+            printTypeName(bestSellingType());
+            printf(": %d$\n",bestSellingTypeAmount());
+            printf("The most profitable day was day number %d: %d$\n",bestSellingDay()+addOne,bestSellingDayAmount());
+            break;
+
+
+
+        case deltas:
+            if (days[start] <= 1)
+            {
+                printf("Not enough days for this process.\n");
+                break;
+            }
+                printf("Not enough days for this process.\n");
+                for(int i = 0; i < NUM_OF_BRANDS; i++)
+                {
+                    printf("Brand: ");
+                    printBrandName(i);
+                    printf(", Average Delta: %f\n",brandDelta(i));
+                }
+
+
             break;
 
             /*
