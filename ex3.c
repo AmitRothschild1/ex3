@@ -115,14 +115,19 @@ int allBrandsSalesAreFull(int day,int cube[DAYS_IN_YEAR][NUM_OF_BRANDS][NUM_OF_T
 //This function calculate the sum of all cars in the requested day:
 int totalSalesSum(int day,int cube[DAYS_IN_YEAR][NUM_OF_BRANDS][NUM_OF_TYPES])
 {
-    day = day - addOne; // `addOne` adjusts the day index, assumed to be defined and initialized
-    int sum = 0; // Initialize the sum of sales to 0
-    // Loop through all brands
-    for(int i = 0; i < NUM_OF_BRANDS; i++)
-        // Loop through all types for the current brand
-        for (int j = 0; j < NUM_OF_TYPES; j++)
-            sum += cube[day][i][j];  // Sum all sales for all types and brands
-    return sum; // Return the total sum of sales for the given day
+    if(!allBrandsSalesAreFull(start,cube)) //In case there are no sales at all:
+        return 0; //Return sum is 0
+    else
+    {
+        day = day - addOne; // `addOne` adjusts the day index, assumed to be defined and initialized
+        int sum = 0; // Initialize the sum of sales to 0
+        // Loop through all brands
+        for(int i = 0; i < NUM_OF_BRANDS; i++)
+            // Loop through all types for the current brand
+                for (int j = 0; j < NUM_OF_TYPES; j++)
+                    sum += cube[day][i][j];  // Sum all sales for all types and brands
+        return sum; // Return the total sum of sales for the given day
+    }
 }
 
 //This function calculate the most selling car brand's sum of sales on the requested day:
@@ -426,17 +431,24 @@ double brandDelta(int brand,int cube[DAYS_IN_YEAR][NUM_OF_BRANDS][NUM_OF_TYPES],
     int firstSum = 0; //variable for first day sales sum - set to 0
     int lastSum = 0; //variable for last day sales sum - set to 0
     double difference = 0; //variable for difference sales sum - set to 0
-    for(int k = 0; k < NUM_OF_TYPES; k++) //makes progress for every brand:
-            {
-                firstSum += cube[start][brand][k]; //first day sales value
-                lastSum += cube[days[start]-addOne][brand][k]; //last day sales value
-            }
-            difference += lastSum - firstSum; //difference of first day sum and last day sum
-    return difference/(days[start]-addOne); //returns the difference of sales divided by difference of days
+    if (days[start] > 1) //In case there are enough days for the calculation:
+    {
+        for(int k = 0; k < NUM_OF_TYPES; k++) //makes progress for every brand:
+        {
+            firstSum += cube[start][brand][k]; //first day sales value
+            lastSum += cube[days[start]-addOne][brand][k]; //last day sales value
+        }
+
+        difference = lastSum - firstSum; //difference of first day sum and last day sum
+        return difference/(days[start]-addOne); //returns the difference of sales divided by difference of days
+    }
+    else //In case there are not enough days for the calculation:
+        return difference; //return 0
 }
 
 
-int main() {
+int main()
+{
     int days[NUM_OF_BRANDS] = {0};  // Tracks the current day for each brand
     int cube[DAYS_IN_YEAR][NUM_OF_BRANDS][NUM_OF_TYPES];  // 3D array for storing sales data
     setArrToMinusOne(cube); // Initialize sales data cube
@@ -446,7 +458,7 @@ int main() {
     scanf("%d", &choice); //user chooses option
     while(choice != done) //Program stops running only when user choose option number 7
         {
-        switch(choice) //navigates the user according to his choise
+        switch(choice) //navigates the user according to his choice
         {
             case addOne: //option one
                 //...
@@ -481,6 +493,11 @@ int main() {
             //program keep running until all sales will be successfully filled
             while (allBrandsSalesAreFull(currentSalesDay,cube)==start) //loop stops when all car data on the current day is full
             {
+               if(allBrandsSalesAreFull(DAYS_IN_YEAR-addOne,cube))
+               {
+                   printf("All days are full of data");
+                   break;
+               }
                 //Prints input massage and lets the user know what fields are empty:
                 printf("No data for brands "); //output
                 for(int i = 0; i < NUM_OF_BRANDS; i++) //makes output of every brand name unless the next condition is false:
@@ -523,15 +540,26 @@ int main() {
             // Handles option 3: Provide daily stats for a specific day.
             // Calculates and displays total sales, best-selling brand, and best-selling type.
         case stats: //users choice 3
-            currentSalesDay = days[start]; //redifining cuurent day variable
+            currentSalesDay = days[start]; //redifining current day variable
             int dayCase3; //variable for users day choice
             printf("What day would you like to analyze?\n"); //output
             scanf("%d", &dayCase3); //users day input
-            while (dayCase3<=0 || dayCase3>currentSalesDay) //loop keep running in case day is invalid
+            if(currentSalesDay != start) //In case sales were entered
             {
-                printf("Please enter a valid day.\nWhat day would you like to analyze?\n"); //ask user to input day
-                scanf("%d", &dayCase3); //users day input
+                while (dayCase3<=0 || dayCase3>currentSalesDay) //loop keep running in case day is invalid
+                {
+                    printf("Please enter a valid day.\nWhat day would you like to analyze?\n"); //ask user to input day
+                    scanf("%d", &dayCase3); //users day input
+                }
             }
+           else //In case there are no sales at all
+           {
+               while (dayCase3 != addOne) //Loop stops when user choose 1
+               {
+                   printf("Please enter a valid day.\nWhat day would you like to analyze?\n"); //ask user to input day
+                   scanf("%d", &dayCase3); //users day input
+               }
+           }
             printf("In day number %d:\nThe sales total was %d\n",dayCase3,totalSalesSum(dayCase3,cube)); //output of the day, total sales sum of users day choice
             printf("The best sold brand with %d sales was ",maxBrandSalesAmount(dayCase3,cube)); //output of the sales sum of the brand who sold the highest sum of cars in users day choice
             printBrandName(maxSalesBrand(dayCase3,cube)); //output of the brand who sold the highest sum of cars in users day choice
@@ -570,11 +598,6 @@ int main() {
             //**********************************************************************************************************
 
         case deltas: //users choice 6
-            if (days[start] <= 1) //in case sale days number is not bigger than 1:
-            {
-                printf("Not enough days for this process.\n"); //massage for user the function is irrelevant
-                break; //back to menu
-            }
                 for(int i = 0; i < NUM_OF_BRANDS; i++) //calculates delta for every brand:
                 {
                     printf("Brand: "); //output
